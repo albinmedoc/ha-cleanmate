@@ -1,0 +1,7 @@
+{
+    "name": "Cleanmate",
+    "content_in_root": false,
+    "render_readme": false,
+    "iot_class": "Local Polling",
+    "homeassistant": "2022.12.0"
+  }
