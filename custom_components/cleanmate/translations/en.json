@@ -1,0 +1,21 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "invalid_host": "Invalid host",
+            "invalid_auth_code": "Invalid authentication code",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "title": "Cleanmate vacuum configuration",
+                "data": {
+                    "host": "Host",
+                    "authCode": "Authentication code"
+                }
+            }
+        }
+    }
+}
