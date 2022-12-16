@@ -16,15 +16,15 @@ class Connection:
     def __init__(self, host: str, auth_code: str) -> None:
         self.host = host
         self.auth_code = auth_code
-
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # This should probably be moved to connect()
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error as err:
             raise err
 
     def connect(self) -> None:
         """Connect to the Cleanmate vacuum."""
         self.sock = socket.create_connection((self.host, self.port))
+        self.sock.settimeout(10)
 
     def disconnect(self) -> None:
         """Disconnect from the Cleanmate vacuum."""
@@ -57,24 +57,29 @@ class Connection:
         """Send a raw request to the Cleanmate vacuum."""
         self.connect()
         self.sock.sendall(raw_data)
+        # Detect if vacuum closed the connection, then raise error
+        # A FIN ACK is sent if the auth_code is wrong
     
     def read_data(self):
-        # Read size from header
-        header = self.sock.recv(20)
-        raw_size_hex = header.hex().split("00")[0]
-        size_hex: str = "".join(map(str.__add__, raw_size_hex[-2::-2] ,raw_size_hex[-1::-2]))
-        size = int(size_hex, base=16) - 20 # Minus the header that we already gathered
+        try:
+            # Read size from header
+            header = self.sock.recv(20)
+            raw_size_hex = header.hex().split("00")[0]
+            size_hex: str = "".join(map(str.__add__, raw_size_hex[-2::-2] ,raw_size_hex[-1::-2]))
+            size = int(size_hex, base=16) - 20 # Minus the header that we already gathered
 
-        # Read actual data
-        chunks = []
-        bytes_recd = 0
-        while bytes_recd < size:
-            chunk = self.sock.recv(min(size - bytes_recd, 2048))
-            if chunk == b'':
-                raise RuntimeError("Socket connection broken")
-            chunks.append(chunk)
-            bytes_recd = bytes_recd + len(chunk)
-        data =  b''.join(chunks)
-        response = parse_value(data.decode("ascii"))
-        return response
+            # Read actual data
+            chunks = []
+            bytes_recd = 0
+            while bytes_recd < size:
+                chunk = self.sock.recv(min(size - bytes_recd, 2048))
+                if chunk == b'':
+                    raise RuntimeError("Socket connection broken")
+                chunks.append(chunk)
+                bytes_recd = bytes_recd + len(chunk)
+            data =  b''.join(chunks)
+            response = parse_value(data.decode("ascii"))
+            return response
+        except TimeoutError as err:
+            raise err
         
