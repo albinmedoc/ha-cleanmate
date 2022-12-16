@@ -11,14 +11,16 @@ from homeassistant.core import HomeAssistant
 
 from homeassistant.const import CONF_HOST
 from .const import DOMAIN, PORT, CONF_AUTH_CODE
-from .helpers import hostAvailable
+from .helpers import host_available
 
 _LOGGER = logging.getLogger(DOMAIN)
 
-DATA_SCHEMA = vol.Schema({
-    vol.Required(CONF_HOST): str,
-    vol.Required(CONF_AUTH_CODE): vol.All(str, vol.Length(min=10, max=10))
-})
+DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_HOST): str,
+        vol.Required(CONF_AUTH_CODE): vol.All(str, vol.Length(min=10, max=10)),
+    }
+)
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
@@ -29,15 +31,15 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
 
     try:
         ipaddress.ip_address(data[CONF_HOST])
-    except ValueError:
-        raise InvalidHost
-    
-    if(len(data[CONF_AUTH_CODE]) is not 10):
+    except ValueError as err:
+        raise InvalidHost from err
+
+    if len(data[CONF_AUTH_CODE]) != 10:
         raise InvalidAuthCode
-    
-    if(not hostAvailable(data[CONF_HOST], PORT)):
+
+    if not host_available(data[CONF_HOST], PORT):
         raise ErrorConnecting
-    
+
     return data
 
 
@@ -59,7 +61,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["host"] = "invalid_host"
             except ErrorConnecting:
                 errors["host"] = "error_connecting"
-            except InvalidHost:
+            except InvalidAuthCode:
                 errors["auth_code"] = "invalid_auth_code"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
@@ -74,8 +76,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class InvalidHost(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid hostname."""
 
+
 class ErrorConnecting(exceptions.HomeAssistantError):
     """Error to indicate a connection couldn't be established."""
+
 
 class InvalidAuthCode(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid auth code."""

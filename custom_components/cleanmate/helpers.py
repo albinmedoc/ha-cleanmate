@@ -1,33 +1,38 @@
+"""Helper functions."""
 import json
 import socket
 
+
 def parse_value(value):
-    if(isinstance(value, str)):
+    """Parse json string from vacuum cleaner"""
+    if isinstance(value, str):
         try:
             return parse_value(json.loads(value))
-        except:
+        except Exception:
             pass
-        semi_values = value.split(';')
-        if(len(semi_values) > 1):
+        semi_values = value.split(";")
+        if len(semi_values) > 1:
             return list(map(parse_value, semi_values))
-        comma_values = value.split(',')
-        if(len(comma_values) > 1):
+        comma_values = value.split(",")
+        if len(comma_values) > 1:
             return list(map(parse_value, comma_values))
-        if(value.replace('.','',1).isdigit()):
+        if value.replace(".", "", 1).isdigit():
             return int(value)
-    if(isinstance(value, dict)):
+    if isinstance(value, dict):
         return {k: parse_value(v) for k, v in value.items()}
-    if(isinstance(value, list)):
+    if isinstance(value, list):
         return list(map(parse_value, value))
     return value
 
-def hostAvailable(host: str, port: int) -> bool:
+
+def host_available(host: str, port: int) -> bool:
+    """Check if the host is available on the specified port."""
     success = True
-    s = socket.socket()
+    sock = socket.socket()
     try:
-        s.connect((host, port)) 
+        sock.connect((host, port))
     except Exception:
-        success =  False
+        success = False
     finally:
-        s.close()
+        sock.close()
     return success

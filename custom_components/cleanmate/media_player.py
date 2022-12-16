@@ -32,6 +32,8 @@ async def async_setup_entry(
 
 
 class MediaPlayer(MediaPlayerEntity):
+    """Media player for Cleanmate vacuum cleaner to change audio level"""
+
     def __init__(self, device, name) -> None:
         """Initialize the Cleanmate vacuum cleaner"""
         self.device = device
@@ -45,7 +47,9 @@ class MediaPlayer(MediaPlayerEntity):
     @property
     def volume_level(self) -> float:
         """Volume level of the media player (0..1)."""
-        return self.device.volume / 100.0
+        if self.device.volume:
+            return self.device.volume / 100.0
+        return 0
 
     @property
     def supported_features(self) -> MediaPlayerEntityFeature:
