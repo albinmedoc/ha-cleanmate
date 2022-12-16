@@ -24,7 +24,8 @@ class MopMode(Enum):
     Low = 60
 
 class ErrorCode(Enum):
-    PlaceDock = 119
+    LocalizationFailed = 119
+    Stuck = 106
 
 class CleanmateVacuum(Connection):
     """A Cleanmate vacuum."""
@@ -34,7 +35,7 @@ class CleanmateVacuum(Connection):
     work_state: WorkState = None
     had_work: bool = False
     mop_mode: MopMode = None
-    volume: int = 0
+    volume: int = None
     error_code: int = None
 
     def get_state_data(self) -> dict:
