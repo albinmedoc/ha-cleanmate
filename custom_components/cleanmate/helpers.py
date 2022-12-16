@@ -1,4 +1,5 @@
 import json
+import socket
 
 def parse_value(value):
     if(isinstance(value, str)):
@@ -19,3 +20,14 @@ def parse_value(value):
     if(isinstance(value, list)):
         return list(map(parse_value, value))
     return value
+
+def hostAvailable(host: str, port: int) -> bool:
+    success = True
+    s = socket.socket()
+    try:
+        s.connect((host, port)) 
+    except Exception:
+        success =  False
+    finally:
+        s.close()
+    return success

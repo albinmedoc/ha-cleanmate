@@ -10,7 +10,8 @@ from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant
 
 from homeassistant.const import CONF_HOST
-from .const import DOMAIN, CONF_AUTH_CODE
+from .const import DOMAIN, PORT, CONF_AUTH_CODE
+from .helpers import hostAvailable
 
 _LOGGER = logging.getLogger(DOMAIN)
 
@@ -33,6 +34,11 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     
     if(len(data[CONF_AUTH_CODE]) is not 10):
         raise InvalidAuthCode
+    
+    if(not hostAvailable(data[CONF_HOST], PORT)):
+        raise ErrorConnecting
+    
+    return data
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -48,9 +54,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 info = await validate_input(self.hass, user_input)
 
-                return self.async_create_entry(title="Cleanmate", data=user_input)
+                return self.async_create_entry(title="Cleanmate", data=info)
             except InvalidHost:
                 errors["host"] = "invalid_host"
+            except ErrorConnecting:
+                errors["host"] = "error_connecting"
             except InvalidHost:
                 errors["auth_code"] = "invalid_auth_code"
             except Exception:  # pylint: disable=broad-except
@@ -65,6 +73,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class InvalidHost(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid hostname."""
+
+class ErrorConnecting(exceptions.HomeAssistantError):
+    """Error to indicate a connection couldn't be established."""
 
 class InvalidAuthCode(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid auth code."""
