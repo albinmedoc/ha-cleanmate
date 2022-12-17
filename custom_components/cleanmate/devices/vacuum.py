@@ -53,7 +53,7 @@ class CleanmateVacuum(Connection):
         """Get state data of the vacuum."""
         data = {"state": "", "transitCmd": "98"}
         await self.send_request(data)
-        state_data = await self.read_data()
+        state_data = await self.get_response()
         return state_data
 
     async def update_state(self) -> None:
@@ -78,7 +78,7 @@ class CleanmateVacuum(Connection):
             "transitCmd": "133",
         }
         await self.send_request(data)
-        map_data = await self.read_data()
+        map_data = await self.get_response()
         return map_data
 
     async def start(self, work_mode: WorkMode = None) -> None:
