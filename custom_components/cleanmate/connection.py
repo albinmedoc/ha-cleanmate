@@ -62,13 +62,17 @@ class Connection:
         await self.connect()
         self.writer.write(raw_data)
         await self.writer.drain()
-        # Detect if vacuum closed the connection, then raise error
-        # A FIN ACK is sent if the auth_code is wrong
 
-    async def read_data(self):
+    async def read_data(self, bytes: int) -> bytes:
+        data = await self.reader.read(bytes)
+        if(not data): 
+            raise ConnectionError
+        return data
+    
+    async def get_response(self):
         try:
             # Read size from header
-            header = await self.reader.read(20)
+            header = await self.read_data(20)
             raw_size_hex = header.hex().split("00")[0]
             size_hex: str = "".join(
                 map(str.__add__, raw_size_hex[-2::-2], raw_size_hex[-1::-2])
@@ -78,7 +82,7 @@ class Connection:
             )  # Minus the header that we already gathered
 
             # Read actual data
-            data = await self.reader.read(size)
+            data = await self.read_data(size)
             response = parse_value(data.decode("ascii"))
             return response
         except asyncio.TimeoutError as err:

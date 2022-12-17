@@ -46,7 +46,6 @@ class Vacuum(StateVacuumEntity):
     def __init__(self, device: CleanmateVacuum) -> None:
         """Initialize the Cleanmate vacuum cleaner"""
         self.device = device
-        self.device.connect()
         self.device.update_state()
         self._attr_fan_speed = None
         self._attr_error = None
