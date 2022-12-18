@@ -2,7 +2,6 @@
 from enum import Enum
 from ..connection import Connection
 
-
 class WorkMode(Enum):
     """The cleaning intensity."""
 

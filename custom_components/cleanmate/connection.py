@@ -73,16 +73,21 @@ class Connection:
         try:
             # Read size from header
             header = await self.read_data(20)
-            raw_size_hex = header.hex().split("00")[0]
+
+            raw_size_hex = header[:4].hex()
+
+            # Reverse the order pairwise
             size_hex: str = "".join(
                 map(str.__add__, raw_size_hex[-2::-2], raw_size_hex[-1::-2])
             )
             size = (
-                int(size_hex, base=16) - 20
+                int(size_hex, base=16) - len(header)
             )  # Minus the header that we already gathered
 
             # Read actual data
-            data = await self.read_data(size)
+            data = b""
+            while len(data) < size:
+                data += await self.read_data(size)
             response = parse_value(data.decode("ascii"))
             return response
         except asyncio.TimeoutError as err:
