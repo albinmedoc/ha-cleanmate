@@ -17,7 +17,7 @@ from homeassistant.helpers.icon import icon_for_battery_level
 from .const import DOMAIN
 from .devices.vacuum import CleanmateVacuum, WorkMode, WorkState
 
-_LOGGER = logging.getLogger(DOMAIN)
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(hass, config_entry, async_add_entities):
@@ -38,6 +38,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class Vacuum(StateVacuumEntity):
 
     fan_speed_map = {
+        "intensive": WorkMode.Intensive,
+        "standard": WorkMode.Standard,
+        "silent": WorkMode.Silent,
+    }
+
+    work_state_map = {
         "intensive": WorkMode.Intensive,
         "standard": WorkMode.Standard,
         "silent": WorkMode.Silent,
@@ -74,15 +80,17 @@ class Vacuum(StateVacuumEntity):
         current_work_state = self.device.work_state
         if current_work_state is WorkState.Cleaning:
             return STATE_CLEANING
-        if current_work_state is WorkState.Charging:
-            return "charging"
         if current_work_state is WorkState.Idle:
             if self.device.had_work:
                 return STATE_PAUSED
             return STATE_IDLE
+        if current_work_state is WorkState.Returning:
+            return STATE_IDLE
+        if current_work_state is WorkState.Charging:
+            return STATE_DOCKED
         if current_work_state is WorkState.Problem:
             return STATE_ERROR
-        _LOGGER.debug("Unkown work_state %s", self.device.work_state)
+        _LOGGER.debug("Unkown work_state %s", current_work_state)
         return STATE_DOCKED
 
     @property
@@ -166,4 +174,6 @@ class Vacuum(StateVacuumEntity):
 
     async def async_update(self) -> None:
         """Update state of the vacuum cleaner."""
+        _LOGGER.debug("Updating state of vacuum")
         await self.device.update_state()
+        _LOGGER.debug("State updated")

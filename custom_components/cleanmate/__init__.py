@@ -9,7 +9,7 @@ from .devices.vacuum import CleanmateVacuum
 
 # List of platforms to support. There should be a matching .py file for each,
 # eg <cover.py> and <sensor.py>
-PLATFORMS: list[str] = ["vacuum", "media_player"]
+PLATFORMS: list[str] = ["vacuum", "number"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Cleanmate from a config entry."""
@@ -28,7 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_forward_entry_setup(entry, 'vacuum')
     )
     hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, 'media_player')
+        hass.config_entries.async_forward_entry_setup(entry, 'number')
     )
     return True
 

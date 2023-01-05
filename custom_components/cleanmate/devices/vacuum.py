@@ -8,6 +8,7 @@ class WorkMode(Enum):
     Intensive = 7
     Standard = 1
     Silent = 9
+    Unknown = 99
 
 
 class WorkState(Enum):
@@ -17,8 +18,10 @@ class WorkState(Enum):
     Idle = 2
     Returning = 4
     Charging = 5
+    Docked = 6
     Error = 7
     Problem = 9
+    Unknown = 99
 
 
 class MopMode(Enum):
@@ -27,13 +30,19 @@ class MopMode(Enum):
     High = 20
     Medium = 40
     Low = 60
+    Unknown = 99
 
 
 class ErrorCode(Enum):
     """The error code"""
-
-    LocalizationFailed = 119
+    
+    SideBrushStuck = 104 # Sidoborsten/-arna har fastnat. Vänligen kontrollera.
+                         # Lossa och rensa borstarna från föremål/smuts. Se till att de kan rotera fritt.
+    NoContactWithFloow = 109 # Roboten har inte kontakt med golver
+                             # Placera roboten med båda hjulen på golvet och starta på nytt.
+    RearWheelOverload = 105
     Stuck = 106
+    LocalizationFailed = 119
 
 
 class CleanmateVacuum(Connection):
@@ -60,11 +69,21 @@ class CleanmateVacuum(Connection):
         state_value = (await self.get_state_data())["value"]
         self.battery_level = state_value["battery"]
         self.version = state_value["version"]
-        self.work_mode = state_value["workMode"]
-        self.work_state = state_value["workState"]
         self.had_work = state_value["extParam"]["hadWork"]
-        self.mop_mode = state_value["waterTank"]
         self.error_code = state_value["error"]
+
+        try:
+            self.work_mode = WorkMode(state_value["workMode"])
+        except:
+            self.work_mode = WorkMode.Unknown
+        try:
+            self.work_state = WorkState(state_value["workState"])
+        except:
+            self.work_state = WorkState.Unknown
+        try:
+            self.mop_mode = MopMode(state_value["waterTank"])
+        except:
+            self.mop_mode = MopMode.Unknown
 
     async def get_map_data(self) -> dict:
         """Get map data of the vacuum."""

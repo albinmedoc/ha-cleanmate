@@ -13,7 +13,7 @@ from homeassistant.const import CONF_HOST
 from .const import DOMAIN, PORT, CONF_AUTH_CODE
 from .helpers import host_available
 
-_LOGGER = logging.getLogger(DOMAIN)
+_LOGGER = logging.getLogger(__name__)
 
 DATA_SCHEMA = vol.Schema(
     {
