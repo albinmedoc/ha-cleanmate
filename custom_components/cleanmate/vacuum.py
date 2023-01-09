@@ -58,17 +58,17 @@ class Vacuum(StateVacuumEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{self.device.host}-{self.device.auth_code}"
+        return f"{self.device.host}"
 
     @property
     def name(self) -> str:
-        return f"Vacuum - {self.device.host}"
+        return "Vacuum"
 
     @property
     def device_info(self):
         """Return the device info."""
         return {
-            "identifiers": {(DOMAIN, self.name)},
+            "identifiers": {(DOMAIN, self.device.host)},
             "name": self.name,
             "manufacturer": "Cleanmate",
             "sw_version": self.device.version,

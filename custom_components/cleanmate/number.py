@@ -40,6 +40,19 @@ class CleanmateVolume(NumberEntity):
         self.device.update_state()
     
     @property
+    def unique_id(self) -> str:
+        return f"{self.device.host}_volume"
+    
+    @property
+    def name(self) -> str:
+        return "Volume"
+
+    @property
+    def device_info(self):
+        """Return the device info."""
+        return {"identifiers": {(DOMAIN, self.device.host)}}
+    
+    @property
     def mode(self) -> int:
         """Input mode."""
         return NumberMode.SLIDER
@@ -47,7 +60,7 @@ class CleanmateVolume(NumberEntity):
     @property
     def native_max_value(self) -> int:
         """Volume max level."""
-        return 100
+        return 10
     
     @property
     def native_min_value(self) -> int:
@@ -57,15 +70,15 @@ class CleanmateVolume(NumberEntity):
     @property
     def native_step(self) -> int:
         """Volume step."""
-        return 10
+        return 1
 
     @property
     def native_value(self) -> int:
         """Volume step."""
         if self.device.volume:
-            return self.device.volume
+            return self.device.volume / 10
         return 0
     
     async def async_set_native_value(self, value: float) -> None:
         """Set volume level."""
-        await self.device.set_volume(value)
+        await self.device.set_volume(value * 10)
