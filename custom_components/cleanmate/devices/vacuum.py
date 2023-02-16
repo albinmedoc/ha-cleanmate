@@ -75,10 +75,14 @@ class CleanmateVacuum(Connection):
     async def update_state(self) -> None:
         """Get and update state of the vacuum."""
         state_value = (await self.get_state_data())["value"]
-        self.battery_level = state_value["battery"]
-        self.version = state_value["version"]
-        self.had_work = state_value["extParam"]["hadWork"]
-        self.error_code = state_value["error"]
+        if "battery" in state_value:
+            self.battery_level = state_value["battery"]
+        if "version" in state_value:
+            self.version = state_value["version"]
+        if "extParam" in state_value and "hadWork" in state_value["extParam"]:
+            self.had_work = state_value["extParam"]["hadWork"]
+        if "error" in state_value:
+            self.error_code = state_value["error"]
 
         try:
             self.work_mode = WorkMode(state_value["workMode"])
@@ -110,12 +114,15 @@ class CleanmateVacuum(Connection):
     async def update_map_data(self) -> None:
         """Get and update map data of the vacuum."""
         map_value = (await self.get_map_data())["value"]
-        for room in map_value["regionNames"]:
-            region_name = base64.b64decode(room["regionName"]).decode("utf-8")
-            room["regionName"] = region_name
-        self.rooms = map_value["regionNames"]
-        self.charger_position = map_value["chargerPos"]
-        self.robot_position = map_value["robotPos"]
+        if "regionNames" in map_value:
+            for room in map_value["regionNames"]:
+                region_name = base64.b64decode(room["regionName"]).decode("utf-8")
+                room["regionName"] = region_name
+            self.rooms = map_value["regionNames"]
+        if "chargerPos" in map_value:
+            self.charger_position = map_value["chargerPos"]
+        if "robotPos" in map_value:
+            self.robot_position = map_value["robotPos"]
 
     async def start(self, work_mode: WorkMode = None) -> None:
         """Start cleaning."""

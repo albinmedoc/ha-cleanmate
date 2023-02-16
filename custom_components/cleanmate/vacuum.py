@@ -141,13 +141,26 @@ class Vacuum(StateVacuumEntity):
             | VacuumEntityFeature.STATUS
             | VacuumEntityFeature.START
         )
+    
+    @property
+    def rooms(self):
+        """Return the state attributes of the vacuum cleaner."""
+        rooms = []
+        for room in self.device.rooms:
+            rooms.append({
+                "id": room["regionNum"],
+                "name": room["regionName"],
+            })
+        return rooms
 
     @property
     def extra_state_attributes(self):
         """Return the state attributes of the vacuum cleaner."""
+        # Add room ids, progress, etc
         return {
             "charger_position": self.device.charger_position,
-            "robot_position": self.device.robot_position
+            "robot_position": self.device.robot_position,
+            "rooms": self.rooms
         }
 
     async def async_return_to_base(self, **kwargs: Any) -> None:
