@@ -1,5 +1,7 @@
 """A Cleanmate vacuum."""
+import base64
 from enum import Enum
+from typing import Tuple
 from ..connection import Connection
 
 class WorkMode(Enum):
@@ -48,6 +50,7 @@ class ErrorCode(Enum):
 class CleanmateVacuum(Connection):
     """A Cleanmate vacuum."""
 
+    # Values from state response
     battery_level: int = None
     version: str = None
     work_mode: WorkMode = None
@@ -56,6 +59,11 @@ class CleanmateVacuum(Connection):
     mop_mode: MopMode = None
     volume: int = None
     error_code: int = None
+
+    # Values from map response
+    rooms: list = []
+    charger_position: Tuple[int, int] = ()
+    robot_position: Tuple[int, int] = ()
 
     async def get_state_data(self) -> dict:
         """Get state data of the vacuum."""
@@ -98,6 +106,16 @@ class CleanmateVacuum(Connection):
         await self.send_request(data)
         map_data = await self.get_response()
         return map_data
+    
+    async def update_map_data(self) -> None:
+        """Get and update map data of the vacuum."""
+        map_value = (await self.get_map_data())["value"]
+        for room in map_value["regionNames"]:
+            region_name = base64.b64decode(room["regionName"]).decode("utf-8")
+            room["regionName"] = region_name
+        self.rooms = map_value["regionNames"]
+        self.charger_position = map_value["chargerPos"]
+        self.robot_position = map_value["robotPos"]
 
     async def start(self, work_mode: WorkMode = None) -> None:
         """Start cleaning."""

@@ -86,7 +86,7 @@ class Vacuum(StateVacuumEntity):
             return STATE_IDLE
         if current_work_state is WorkState.Returning:
             return STATE_IDLE
-        if current_work_state is WorkState.Charging:
+        if current_work_state in [WorkState.Docked, WorkState.Charging] :
             return STATE_DOCKED
         if current_work_state is WorkState.Problem:
             return STATE_ERROR
@@ -145,7 +145,10 @@ class Vacuum(StateVacuumEntity):
     @property
     def extra_state_attributes(self):
         """Return the state attributes of the vacuum cleaner."""
-        pass
+        return {
+            "charger_position": self.device.charger_position,
+            "robot_position": self.device.robot_position
+        }
 
     async def async_return_to_base(self, **kwargs: Any) -> None:
         """Set the vacuum cleaner to return to the dock."""
@@ -173,7 +176,6 @@ class Vacuum(StateVacuumEntity):
         await self.device.start(work_mode)
 
     async def async_update(self) -> None:
-        """Update state of the vacuum cleaner."""
-        _LOGGER.debug("Updating state of vacuum")
+        """Update state and map of the vacuum cleaner."""
         await self.device.update_state()
-        _LOGGER.debug("State updated")
+        await self.device.update_map_data()
