@@ -1,0 +1,80 @@
+name: "Bug Report"
+description: Create a report to help us improve
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please [search for existing issues](https://github.com/albinmedoc/ha-cleanmate/issues) before creating a new one.
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproduction Steps
+      description: Please list out the steps to reproduce your bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Run service '...' with parameters '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: If applicable, add error logs.
+      description: |
+        Do you have an error log of what happened?
+        You can find logs at [Home Assistant - Configuration - Settings - Logs](https://my.home-assistant.io/redirect/logs)
+    validations:
+      required: false
+
+  - type: input
+    attributes:
+      label: Device Model
+      description: |
+        Specify your vacuum device model.
+      placeholder: "S995"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Device Firmware
+      description: |
+        Specify your vacuum device firmware.
+      placeholder: "5.11.710(51i)"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Search for similar issues
+      description: |
+        Have you searched for your issue in [existing issues](https://github.com/albinmedoc/ha-cleanmate/issues)?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: |
+        Add any other information about the problem here.
+    validations:
+      required: false
