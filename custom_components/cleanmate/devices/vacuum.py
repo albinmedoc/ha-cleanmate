@@ -191,7 +191,7 @@ class CleanmateVacuum(Connection):
             room_id_str = str(room["room_id"])
             if not any(room_id_str == x["blockNum"] for x in rooms_request):
                 rooms_request.append({
-                    "cleanNum": room["clean_num"],
+                    "cleanNum": str(room["clean_num"]),
                     "blockNum": room_id_str
                 })
         data = {
