@@ -40,7 +40,7 @@ class ErrorCode(Enum):
     
     SideBrushStuck = 104 # Sidoborsten/-arna har fastnat. Vänligen kontrollera.
                          # Lossa och rensa borstarna från föremål/smuts. Se till att de kan rotera fritt.
-    NoContactWithFloow = 109 # Roboten har inte kontakt med golver
+    NoContactWithFloor = 109 # Roboten har inte kontakt med golvet
                              # Placera roboten med båda hjulen på golvet och starta på nytt.
     RearWheelOverload = 105
     Stuck = 106
@@ -182,18 +182,21 @@ class CleanmateVacuum(Connection):
         }
         await self.send_request(data)
 
-    async def clean_rooms(self, room_ids: list[int]) -> None:
+    async def clean_rooms(self, rooms: list[dict]) -> None:
         """Clean specific rooms"""
-        unique_sorted_ids = sorted(list(dict.fromkeys(room_ids)))
-        clean_blocks = list(
-            map(
-                lambda room_id: {"cleanNum": "1", "blockNum": str(room_id)},
-                unique_sorted_ids,
-            )
-        )
+
+        rooms_request: list[dict] = []
+        # Remove duplicates and change format
+        for room in rooms:
+            room_id_str = str(room["room_id"])
+            if not any(room_id_str == x["blockNum"] for x in rooms_request):
+                rooms_request.append({
+                    "cleanNum": str(room["clean_num"]),
+                    "blockNum": room_id_str
+                })
         data = {
             "opCmd": "cleanBlocks",
-            "cleanBlocks": clean_blocks,
+            "cleanBlocks": sorted(rooms_request, key=lambda x: x["blockNum"]),
         }
         await self.send_request(data)
 
