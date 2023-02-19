@@ -1,6 +1,7 @@
 """Support for Cleanmate Vaccums."""
 import logging
 from typing import Any
+import voluptuous as vol
 
 from homeassistant.components.vacuum import (
     StateVacuumEntity,
@@ -12,6 +13,7 @@ from homeassistant.components.vacuum import (
     STATE_ERROR,
 )
 
+from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.icon import icon_for_battery_level
 
 from .const import DOMAIN
@@ -33,6 +35,21 @@ async def async_setup_platform(hass, config_entry, async_add_entities):
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     await async_setup_platform(hass, config_entry, async_add_entities)
+    platform = entity_platform.async_get_current_platform()
+
+    # This will call Entity.clean_room(entity_id=VALUE)
+    platform.async_register_entity_service(
+        "clean_rooms",
+        {
+            "rooms": [
+                {
+                    vol.Required('room_id'): cv.Number,
+                    vol.Required('clean_num', default=1): cv.Number
+                }
+            ]
+        },
+        "clean_rooms",
+    )
 
 
 class Vacuum(StateVacuumEntity):
@@ -192,3 +209,7 @@ class Vacuum(StateVacuumEntity):
         """Update state and map of the vacuum cleaner."""
         await self.device.update_state()
         await self.device.update_map_data()
+    
+    async def clean_rooms(self, rooms: list[dict]):
+        # Make sure all rooms exists
+        await self.device.clean_rooms(rooms)
